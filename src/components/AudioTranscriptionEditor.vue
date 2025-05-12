@@ -50,7 +50,8 @@ const BATCH_SIZE = 5
 let currentIndex = 0
 
 onMounted(async () => {
-  const res = await fetch('http://localhost:3001/api/audio-files')
+  // Utilisation de chemin relatif pour fonctionner en production
+  const res = await fetch('/api/audio-files')
   audioFiles.value = await res.json()
   loadMore()
 })
@@ -72,7 +73,7 @@ async function validate(id) {
   const file = visibleFiles.value.find(f => f.id === id)
 
   try {
-    const res = await fetch('http://localhost:3001/api/save-transcription', {
+    const res = await fetch('/api/save-transcription', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: file.name, transcription: file.transcription })
