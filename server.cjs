@@ -57,11 +57,11 @@ app.post('/api/save-transcription', (req, res) => {
 
 app.use('/audio', express.static(AUDIO_DIR))
 
-// Sert les fichiers statiques du build Vue
+// Sert d’abord les fichiers statiques du build
 app.use(express.static(path.join(__dirname, 'dist')))
 
-// Fallback : toutes les routes non-API renvoient index.html
-app.get('/*', (req, res) => {
+// Fallback SPA : on utilise une regex pour matcher tout chemin
+app.get(/.*/, (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'))
 })
 
