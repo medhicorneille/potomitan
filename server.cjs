@@ -57,7 +57,6 @@ app.post('/api/save-transcription', (req, res) => {
 
 app.use('/audio', express.static(AUDIO_DIR))
 
-const path = require('path')
 app.use(express.static(path.join(__dirname, 'dist')))
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist/index.html'))
