@@ -57,9 +57,9 @@ app.post('/api/save-transcription', (req, res) => {
 
 app.use('/audio', express.static(AUDIO_DIR))
 
-app.use(express.static(path.join(__dirname, 'dist')))
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist/index.html'))
-})
+// app.use(express.static(path.join(__dirname, 'dist')))
+// app.get('*', (req, res) => {
+//   res.sendFile(path.join(__dirname, 'dist/index.html'))
+// })
 
 app.listen(PORT, () => console.log(`✅ Serveur Express lancé sur http://localhost:${PORT}`))
