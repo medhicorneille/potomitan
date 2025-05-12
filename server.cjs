@@ -57,9 +57,13 @@ app.post('/api/save-transcription', (req, res) => {
 
 app.use('/audio', express.static(AUDIO_DIR))
 
+// Sert les fichiers statiques du build Vue
 app.use(express.static(path.join(__dirname, 'dist')))
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist/index.html'))
+
+// Fallback : toutes les routes non-API renvoient index.html
+app.get('/*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'))
 })
+
 
 app.listen(PORT, () => console.log(`✅ Serveur Express lancé sur http://localhost:${PORT}`))
