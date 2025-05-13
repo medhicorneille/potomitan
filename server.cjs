@@ -1,3 +1,11 @@
+const { Pool } = require('pg')
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false } // requis pour Render
+})
+
+
 const express = require('express')
 const fs = require('fs')
 const path = require('path')
@@ -14,46 +22,57 @@ app.use(cors())
 app.use(bodyParser.json())
 
 // Liste les fichiers audio et leur transcription (avec historique)
-app.get('/api/audio-files', (req, res) => {
-  const audioFiles = fs.readdirSync(AUDIO_DIR).filter(f => f.endsWith('.wav') || f.endsWith('.mp3'))
-  const existingTranscripts = fs.existsSync(TRANSCRIPT_PATH)
-    ? JSON.parse(fs.readFileSync(TRANSCRIPT_PATH, 'utf-8'))
-    : {}
+app.get('/api/audio-files', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT filename, transcription, timestamp
+      FROM transcriptions
+      ORDER BY filename, timestamp ASC
+    `)
 
-  const files = audioFiles.map((file, index) => {
-    const history = existingTranscripts[file] || []
-    return {
-      id: index + 1,
-      name: file,
-      src: `/audio/${file}`,
-      transcription: history.length > 0 ? history[history.length - 1].transcription : '',
-      history: history
-    }
-  })
-  res.json(files)
+    // Regroupe par fichier
+    const grouped = {}
+    result.rows.forEach(row => {
+      if (!grouped[row.filename]) grouped[row.filename] = []
+      grouped[row.filename].push({
+        transcription: row.transcription,
+        timestamp: row.timestamp
+      })
+    })
+
+    const files = Object.entries(grouped).map(([filename, history], i) => ({
+      id: i + 1,
+      name: filename,
+      src: `/audio/${filename}`,
+      transcription: history[history.length - 1].transcription,
+      history
+    }))
+
+    res.json(files)
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Erreur de récupération des transcriptions' })
+  }
 })
+
 
 // Enregistre une nouvelle transcription avec horodatage
-app.post('/api/save-transcription', (req, res) => {
+app.post('/api/save-transcription', async (req, res) => {
   const { name, transcription } = req.body
-  if (!name) return res.status(400).send('Nom de fichier requis.')
+  if (!name || !transcription) return res.status(400).send('Champs requis.')
 
-  const now = new Date().toISOString()
-  let data = {}
-
-  if (fs.existsSync(TRANSCRIPT_PATH)) {
-    data = JSON.parse(fs.readFileSync(TRANSCRIPT_PATH, 'utf-8'))
+  try {
+    await pool.query(
+      `INSERT INTO transcriptions (filename, transcription) VALUES ($1, $2)`,
+      [name, transcription]
+    )
+    res.json({ status: 'ok' })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Erreur lors de l\'enregistrement' })
   }
-
-  if (!data[name]) {
-    data[name] = []
-  }
-
-  data[name].push({ transcription, timestamp: now })
-
-  fs.writeFileSync(TRANSCRIPT_PATH, JSON.stringify(data, null, 2))
-  res.json({ status: 'ok' })
 })
+
 
 app.use('/audio', express.static(AUDIO_DIR))
 
