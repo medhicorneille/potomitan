@@ -1,39 +1,41 @@
 <template>
   <div class="container-wrapper">
-    <div class="container" @scroll.passive="handleScroll" ref="scrollContainer">
-      <h2 class="title">Fichiers Audio & Transcriptions</h2>
-      <div v-if="successMessage" class="toast">{{ successMessage }}</div>
-      <div v-for="file in visibleFiles" :key="file.id" class="row">
-        <!-- Colonne Audio -->
-        <div class="column audio-col">
-          <p class="filename">{{ file.name }}</p>
-          <audio :src="file.src" controls class="audio-player"></audio>
-        </div>
+    <h2 class="title">Fichiers Audio & Transcriptions</h2>
+    <div v-if="successMessage" class="toast">{{ successMessage }}</div>
+    <div
+      v-for="file in visibleFiles"
+      :key="file.id"
+      class="row"
+    >
+      <!-- Colonne Audio -->
+      <div class="column audio-col">
+        <p class="filename">{{ file.name }}</p>
+        <audio :src="file.src" controls class="audio-player"></audio>
+      </div>
 
-        <!-- Colonne Transcription -->
-        <div class="column transcription-col">
-          <textarea
-            v-model="file.transcription"
-            :class="{ empty: file.transcription === '' }"
-            placeholder="Veuillez entrer la transcription ici..."
-          ></textarea>
-          <button @click="validate(file.id)" class="edit-btn">Valider</button>
+      <!-- Colonne Transcription -->
+      <div class="column transcription-col">
+        <textarea
+          v-model="file.transcription"
+          :class="{ empty: file.transcription === '' }"
+          placeholder="Veuillez entrer la transcription ici..."
+        ></textarea>
+        <button @click="validate(file.id)" class="edit-btn">Valider</button>
 
-          <!-- Historique des modifications (replié par défaut) -->
-          <details v-if="file.history && file.history.length > 1" class="history-log">
-            <summary class="history-title">🕒 Historique des modifications</summary>
-            <ul>
-              <li
-                v-for="(entry, idx) in file.history.slice(0, -1).reverse()"
-                :key="idx"
-                class="history-entry"
-              >
-                <span class="timestamp">🗓️ {{ new Date(entry.timestamp).toLocaleString() }}</span><br />
-                <span class="content text-sm italic">{{ entry.transcription }}</span>
-              </li>
-            </ul>
-          </details>
-        </div>
+        <!-- Historique des modifications -->
+        <details v-if="file.history && file.history.length > 1" class="history-log">
+          <summary class="history-title">🕒 Historique des modifications</summary>
+          <ul>
+            <li
+              v-for="(entry, idx) in file.history.slice(0, -1).reverse()"
+              :key="idx"
+              class="history-entry"
+            >
+              <span class="timestamp">🗓️ {{ new Date(entry.timestamp).toLocaleString() }}</span><br />
+              <span class="content text-sm italic">{{ entry.transcription }}</span>
+            </li>
+          </ul>
+        </details>
       </div>
     </div>
   </div>
@@ -45,51 +47,36 @@ import { ref, onMounted } from 'vue'
 const audioFiles = ref([])
 const visibleFiles = ref([])
 const successMessage = ref('')
-const scrollContainer = ref(null)
 const BATCH_SIZE = 5
 let currentIndex = 0
 
 onMounted(async () => {
-  // Utilisation de chemin relatif pour fonctionner en production
   const res = await fetch('/api/audio-files')
   audioFiles.value = await res.json()
   loadMore()
 })
 
 function loadMore() {
-  const nextBatch = audioFiles.value.slice(currentIndex, currentIndex + BATCH_SIZE)
-  visibleFiles.value.push(...nextBatch)
+  const next = audioFiles.value.slice(currentIndex, currentIndex + BATCH_SIZE)
+  visibleFiles.value.push(...next)
   currentIndex += BATCH_SIZE
-}
-
-function handleScroll() {
-  const el = scrollContainer.value
-  if (el.scrollTop + el.clientHeight >= el.scrollHeight - 50) {
-    loadMore()
-  }
 }
 
 async function validate(id) {
   const file = visibleFiles.value.find(f => f.id === id)
-
   try {
     const res = await fetch('/api/save-transcription', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: file.name, transcription: file.transcription })
     })
-
     if (!res.ok) throw new Error('Erreur lors de la sauvegarde.')
-
     if (!file.history) file.history = []
-    file.history.push({
-      transcription: file.transcription,
-      timestamp: new Date().toISOString()
-    })
-
+    file.history.push({ transcription: file.transcription, timestamp: new Date().toISOString() })
     successMessage.value = `✅ Transcription pour « ${file.name} » enregistrée !`
     setTimeout(() => (successMessage.value = ''), 3000)
   } catch (err) {
+    console.error(err)
     successMessage.value = `❌ Erreur : ${err.message}`
     setTimeout(() => (successMessage.value = ''), 4000)
   }
@@ -97,20 +84,12 @@ async function validate(id) {
 </script>
 
 <style scoped>
+/* Supprime les overflow qui génèrent une double scrollbar */
 html, body, #app {
-  height: 100%;
   margin: 0;
-  overflow: hidden;
 }
 
 .container-wrapper {
-  height: 100vh;
-  overflow: hidden;
-}
-
-.container {
-  height: 100%;
-  overflow-y: auto;
   padding: 16px;
   background-color: #f3f4f6;
 }
