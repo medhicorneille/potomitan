@@ -1,19 +1,12 @@
 <template>
-  <div class="container-wrapper" @scroll.passive="handleScroll" ref="scrollContainer">
+  <div class="app-container">
     <h2 class="title">Fichiers Audio & Transcriptions</h2>
     <div v-if="successMessage" class="toast">{{ successMessage }}</div>
-    <div
-      v-for="file in visibleFiles"
-      :key="file.id"
-      class="row"
-    >
-      <!-- Colonne Audio -->
+    <div v-for="file in visibleFiles" :key="file.id" class="row">
       <div class="column audio-col">
         <p class="filename">{{ file.name }}</p>
         <audio :src="file.src" controls class="audio-player"></audio>
       </div>
-
-      <!-- Colonne Transcription -->
       <div class="column transcription-col">
         <textarea
           v-model="file.transcription"
@@ -21,16 +14,10 @@
           placeholder="Veuillez entrer la transcription ici..."
         ></textarea>
         <button @click="validate(file.id)" class="edit-btn">Valider</button>
-
-        <!-- Historique des modifications -->
         <details v-if="file.history && file.history.length > 1" class="history-log">
           <summary class="history-title">🕒 Historique des modifications</summary>
           <ul>
-            <li
-              v-for="(entry, idx) in file.history.slice(0, -1).reverse()"
-              :key="idx"
-              class="history-entry"
-            >
+            <li v-for="(entry, idx) in file.history.slice(0, -1).reverse()" :key="idx" class="history-entry">
               <span class="timestamp">🗓️ {{ new Date(entry.timestamp).toLocaleString() }}</span><br />
               <span class="content text-sm italic">{{ entry.transcription }}</span>
             </li>
@@ -42,21 +29,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 
 const audioFiles = ref([])
 const visibleFiles = ref([])
 const successMessage = ref('')
 const BATCH_SIZE = 5
 let currentIndex = 0
-
-const scrollContainer = ref(null)
-
-onMounted(async () => {
-  const res = await fetch('/api/audio-files')
-  audioFiles.value = await res.json()
-  loadMore()
-})
 
 function loadMore() {
   const next = audioFiles.value.slice(currentIndex, currentIndex + BATCH_SIZE)
@@ -65,8 +44,7 @@ function loadMore() {
 }
 
 function handleScroll() {
-  const el = scrollContainer.value
-  if (el.scrollTop + el.clientHeight >= el.scrollHeight - 50) {
+  if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 50) {
     loadMore()
   }
 }
@@ -75,8 +53,7 @@ async function validate(id) {
   const file = visibleFiles.value.find(f => f.id === id)
   try {
     const res = await fetch('/api/save-transcription', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: file.name, transcription: file.transcription })
     })
     if (!res.ok) throw new Error('Erreur lors de la sauvegarde.')
@@ -90,64 +67,72 @@ async function validate(id) {
     setTimeout(() => (successMessage.value = ''), 4000)
   }
 }
+
+onMounted(async () => {
+  const res = await fetch('/api/audio-files')
+  audioFiles.value = await res.json()
+  loadMore()
+  window.addEventListener('scroll', handleScroll)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('scroll', handleScroll)
+})
 </script>
 
 <style scoped>
-/* Un seul scroll sur container-wrapper */
 html, body, #app {
   height: 100%;
   margin: 0;
-  overflow: hidden;
+  overflow: auto;
 }
-.container-wrapper {
-  height: 100vh;
-  overflow-y: auto;
+.app-container {
+  max-width: 1200px;
+  margin: 0 auto;
   padding: 16px;
-  background-color: #f3f4f6;
+  box-sizing: border-box;
 }
-
 .title {
   text-align: center;
-  font-size: 24px;
+  font-size: 2rem;
   font-weight: 600;
-  margin-bottom: 24px;
+  margin-bottom: 1.5rem;
   color: #111827;
 }
 .toast {
+  max-width: 600px;
+  margin: 0 auto 1rem;
   background-color: #d1fae5;
   color: #065f46;
-  padding: 12px;
+  padding: 0.75rem 1rem;
   border: 1px solid #10b981;
-  border-radius: 8px;
+  border-radius: 0.5rem;
   text-align: center;
-  margin-bottom: 16px;
   font-weight: 500;
 }
 .row {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 16px;
-  margin-bottom: 16px;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
   border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  transition: box-shadow 0.3s ease;
-}
-.row:nth-child(odd) {
+  border-radius: 0.5rem;
   background-color: #ffffff;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
-.row:nth-child(even) {
-  background-color: #f9fafb;
-}
-.row:hover {
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+@media (min-width: 768px) {
+  .row {
+    flex-direction: row;
+    justify-content: space-between;
+  }
 }
 .column {
-  width: 48%;
+  flex: 1;
 }
 .audio-col .filename {
   font-weight: 500;
-  margin-bottom: 8px;
+  margin-bottom: 0.5rem;
   color: #1f2937;
 }
 .audio-player {
@@ -155,26 +140,24 @@ html, body, #app {
 }
 .transcription-col textarea {
   width: 100%;
-  height: 96px;
-  padding: 8px;
+  min-height: 6rem;
+  padding: 0.5rem;
   border: 1px solid #d1d5db;
-  border-radius: 4px;
-  resize: none;
+  border-radius: 0.25rem;
+  resize: vertical;
   font-family: inherit;
-  margin-bottom: 8px;
-  background-color: #ffffff;
-  color: #111827;
+  margin-bottom: 0.5rem;
 }
 .transcription-col textarea.empty {
   border-color: #f87171;
   background-color: #fef2f2;
 }
 .edit-btn {
-  padding: 8px 16px;
+  padding: 0.5rem 1rem;
   background-color: #10b981;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 0.25rem;
   cursor: pointer;
   font-weight: 500;
 }
@@ -182,25 +165,23 @@ html, body, #app {
   background-color: #059669;
 }
 .history-log {
-  margin-top: 8px;
-  padding: 12px;
+  margin-top: 0.75rem;
+  padding: 0.75rem;
   border-top: 1px solid #e5e7eb;
-  font-size: 14px;
+  font-size: 0.875rem;
   background-color: #fefefe;
-  color: #1f2937;
-  border-radius: 6px;
+  border-radius: 0.25rem;
 }
 .history-title {
   font-weight: 600;
   cursor: pointer;
-  user-select: none;
   color: #1f2937;
 }
 .history-entry {
-  margin-bottom: 6px;
+  margin-bottom: 0.5rem;
 }
 .timestamp {
-  font-size: 12px;
+  font-size: 0.75rem;
   color: #6b7280;
 }
 </style>
