@@ -1,5 +1,5 @@
 <template>
-  <div class="container-wrapper">
+  <div class="container-wrapper" @scroll.passive="handleScroll" ref="scrollContainer">
     <h2 class="title">Fichiers Audio & Transcriptions</h2>
     <div v-if="successMessage" class="toast">{{ successMessage }}</div>
     <div
@@ -50,6 +50,8 @@ const successMessage = ref('')
 const BATCH_SIZE = 5
 let currentIndex = 0
 
+const scrollContainer = ref(null)
+
 onMounted(async () => {
   const res = await fetch('/api/audio-files')
   audioFiles.value = await res.json()
@@ -60,6 +62,13 @@ function loadMore() {
   const next = audioFiles.value.slice(currentIndex, currentIndex + BATCH_SIZE)
   visibleFiles.value.push(...next)
   currentIndex += BATCH_SIZE
+}
+
+function handleScroll() {
+  const el = scrollContainer.value
+  if (el.scrollTop + el.clientHeight >= el.scrollHeight - 50) {
+    loadMore()
+  }
 }
 
 async function validate(id) {
@@ -84,12 +93,15 @@ async function validate(id) {
 </script>
 
 <style scoped>
-/* Supprime les overflow qui génèrent une double scrollbar */
+/* Un seul scroll sur container-wrapper */
 html, body, #app {
+  height: 100%;
   margin: 0;
+  overflow: hidden;
 }
-
 .container-wrapper {
+  height: 100vh;
+  overflow-y: auto;
   padding: 16px;
   background-color: #f3f4f6;
 }
