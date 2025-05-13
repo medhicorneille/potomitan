@@ -55,6 +55,24 @@ app.get('/api/audio-files', async (req, res) => {
   }
 })
 
+app.get('/api/init-db', async (req, res) => {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS transcriptions (
+        id SERIAL PRIMARY KEY,
+        filename TEXT NOT NULL,
+        transcription TEXT NOT NULL,
+        timestamp TIMESTAMPTZ DEFAULT NOW()
+      )
+    `)
+    res.send('✅ Table transcriptions créée avec succès.')
+  } catch (err) {
+    console.error(err)
+    res.status(500).send('❌ Erreur lors de la création de la table.')
+  }
+})
+
+
 
 // Enregistre une nouvelle transcription avec horodatage
 app.post('/api/save-transcription', async (req, res) => {
