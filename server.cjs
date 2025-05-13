@@ -21,37 +21,46 @@ const TRANSCRIPT_PATH = path.join(__dirname, 'transcriptions.json')
 app.use(cors())
 app.use(bodyParser.json())
 
-// Liste les fichiers audio et leur transcription (avec historique)
+// Liste les fichiers audio + transcription (avec historique complet)
 app.get('/api/audio-files', async (req, res) => {
   try {
-    const result = await pool.query(`
-      SELECT filename, transcription, timestamp
-      FROM transcriptions
-      ORDER BY filename, timestamp ASC
-    `)
+    // 1) Lire TOUS les fichiers .wav/.mp3 du dossier
+    const diskFiles = fs
+      .readdirSync(AUDIO_DIR)
+      .filter((f) => f.endsWith('.wav') || f.endsWith('.mp3'))
 
-    // Regroupe par fichier
-    const grouped = {}
-    result.rows.forEach(row => {
-      if (!grouped[row.filename]) grouped[row.filename] = []
-      grouped[row.filename].push({
-        transcription: row.transcription,
-        timestamp: row.timestamp
-      })
+    // 2) Récupérer TOUT l’historique depuis la BDD
+    const result = await pool.query(
+      `SELECT filename, transcription, timestamp
+       FROM transcriptions
+       ORDER BY timestamp ASC`
+    )
+
+    // 3) Regrouper ces entrées par fichier
+    const historyMap = {}
+    result.rows.forEach(({ filename, transcription, timestamp }) => {
+      if (!historyMap[filename]) historyMap[filename] = []
+      historyMap[filename].push({ transcription, timestamp })
     })
 
-    const files = Object.entries(grouped).map(([filename, history], i) => ({
-      id: i + 1,
-      name: filename,
-      src: `/audio/${filename}`,
-      transcription: history[history.length - 1].transcription,
-      history
-    }))
+    // 4) Construire le JSON final : un objet par fichier, même sans historique
+    const files = diskFiles.map((filename, idx) => {
+      const history = historyMap[filename] || []
+      return {
+        id: idx + 1,
+        name: filename,
+        src: `/audio/${filename}`,
+        transcription: history.length
+          ? history[history.length - 1].transcription
+          : '',
+        history,
+      }
+    })
 
     res.json(files)
   } catch (err) {
     console.error(err)
-    res.status(500).json({ error: 'Erreur de récupération des transcriptions' })
+    res.status(500).json({ error: 'Erreur de récupération des fichiers' })
   }
 })
 
