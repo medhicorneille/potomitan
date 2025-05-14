@@ -1,13 +1,16 @@
 <template>
   <div class="app-container">
-    <h2 class="title">Fichiers Audio & Transcriptions</h2>
-    <div v-if="successMessage" class="toast">{{ successMessage }}</div>
 
-    <!-- Navigation rapide -->
-    <div class="navigation-controls" v-if="visibleFiles.length">
-      <button @click="goToPrevious" :disabled="!hasPrevious" class="nav-btn">← Précédent</button>
-      <span class="nav-status">Segment {{ currentIndexDisplay + 1 }} / {{ audioFiles.length }}</span>
-      <button @click="goToNext" :disabled="!hasNext" class="nav-btn">Suivant →</button>
+  <div class="sticky-header">
+    <h2 class="title">Fichiers Audio & Transcriptions</h2>
+      <div v-if="successMessage" class="toast">{{ successMessage }}</div>
+
+      <!-- Navigation rapide -->
+      <div class="navigation-controls" v-if="visibleFiles.length">
+        <button @click="goToPrevious" :disabled="!hasPrevious" class="nav-btn">← Précédent</button>
+        <span class="nav-status">Segment {{ currentIndexDisplay + 1 }} / {{ audioFiles.length }}</span>
+        <button @click="goToNext" :disabled="!hasNext" class="nav-btn">Suivant →</button>
+      </div>
     </div>
 
     <div v-for="file in visibleFiles" :key="file.id" class="row">
