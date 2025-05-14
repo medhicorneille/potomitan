@@ -12,7 +12,7 @@
 
     <div v-for="file in visibleFiles" :key="file.id" class="row">
       <div class="column audio-col">
-        <p class="filename">⏱ 00:00 → 00:10 — {{ file.name }}</p>
+        <p class="filename">{{ file.name }}</p>
         <audio
           :ref="el => audioRefs[file.id] = el"
           :src="file.src"
