@@ -12,6 +12,8 @@
   --warning-color: #f59e0b;
   --error-bg: #2f1f1f;
   --error-border: #f87171;
+  --toast-success-bg: #1d3e30;
+  --log-background: #181818;
 }
 
 html, body, #app {
@@ -51,13 +53,13 @@ html, body, #app {
 }
 
 .toast {
-  background-color: #1d3e30;
+  background-color: var(--toast-success-bg);
   border-color: var(--success-color);
   color: var(--success-color);
 }
 
 .history-log {
-  background-color: #181818;
+  background-color: var(--log-background);
   border-color: var(--border-color);
   color: var(--text-secondary);
 }
