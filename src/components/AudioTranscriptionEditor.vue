@@ -125,10 +125,12 @@ html, body, #app {
   .row {
     flex-direction: row;
     justify-content: space-between;
+    align-items: flex-start;
   }
 }
 .column {
   flex: 1;
+  min-width: 0;
 }
 .audio-col .filename {
   font-weight: 500;
@@ -147,6 +149,8 @@ html, body, #app {
   resize: vertical;
   font-family: inherit;
   margin-bottom: 0.5rem;
+  box-sizing: border-box;
+  max-width: 100%;
 }
 .transcription-col textarea.empty {
   border-color: #f87171;
