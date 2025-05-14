@@ -1,0 +1,71 @@
+/* Theme Sombre Élégant */
+
+:root {
+  --background-color: #121212;
+  --card-background: #1e1e1e;
+  --text-color: #e0e0e0;
+  --text-secondary: #a0a0a0;
+  --border-color: #2a2a2a;
+  --success-color: #10b981;
+  --success-hover: #059669;
+  --accent-color: #3b82f6;
+  --warning-color: #f59e0b;
+  --error-bg: #2f1f1f;
+  --error-border: #f87171;
+}
+
+html, body, #app {
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+.app-container {
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+.row {
+  background-color: var(--card-background);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.transcription-col textarea {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  border-color: var(--border-color);
+}
+
+.transcription-col textarea.empty {
+  background-color: var(--error-bg);
+  border-color: var(--error-border);
+}
+
+.edit-btn {
+  background-color: var(--success-color);
+  color: white;
+}
+
+.edit-btn:hover {
+  background-color: var(--success-hover);
+}
+
+.toast {
+  background-color: #1d3e30;
+  border-color: var(--success-color);
+  color: var(--success-color);
+}
+
+.history-log {
+  background-color: #181818;
+  border-color: var(--border-color);
+  color: var(--text-secondary);
+}
+
+.history-title {
+  color: var(--text-color);
+}
+
+.timestamp {
+  color: var(--text-secondary);
+}
