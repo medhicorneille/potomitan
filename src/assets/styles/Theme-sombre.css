@@ -26,14 +26,21 @@ html, body, #app {
   font-family: system-ui, sans-serif;
   overflow-x: hidden;
   overflow-y: auto;
+  min-height: 100vh;
+}
+
+body {
+  min-height: 100vh;
 }
 
 .app-container {
   background-color: var(--background-color);
   color: var(--text-color);
-  padding: 2rem 1rem;
+  padding: 6rem 1rem 2rem;
   max-width: 1200px;
   margin: 0 auto;
+  position: relative;
+  min-height: 100%;
 }
 
 .sticky-header {
