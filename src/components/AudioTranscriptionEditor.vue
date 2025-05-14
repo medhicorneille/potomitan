@@ -92,13 +92,14 @@ function focusTextarea(id) {
 }
 
 function loadMore() {
-  const next = audioFiles.value.slice(currentIndex, currentIndex + BATCH_SIZE)
-  visibleFiles.value.push(...next)
+  const nextBatch = audioFiles.value.slice(currentIndex, currentIndex + BATCH_SIZE)
+  visibleFiles.value.push(...nextBatch)
   currentIndex += BATCH_SIZE
 }
 
 function handleScroll() {
-  if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 50) {
+  // Quand on atteint le bas de la page, charger plus
+  if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
     loadMore()
   }
 }
@@ -137,10 +138,13 @@ function handleKeydown(e) {
 }
 
 onMounted(async () => {
+  // 1. Charge d’abord tous les fichiers
   const res = await fetch('/api/audio-files')
   audioFiles.value = await res.json()
+  // 2. Charge la première fournée
   loadMore()
-  window.addEventListener('scroll', handleScroll)
+  window.addEventListener('scroll', handleScroll, { passive: true })
+
   window.addEventListener('keydown', handleKeydown)
 })
 
