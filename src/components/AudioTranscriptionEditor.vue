@@ -3,6 +3,7 @@
 
   <div class="sticky-header">
     <h2 class="title">Fichiers Audio & Transcriptions</h2>
+
       <div v-if="successMessage" class="toast">{{ successMessage }}</div>
 
       <!-- Navigation rapide -->
@@ -155,16 +156,6 @@ onBeforeUnmount(() => {
   window.removeEventListener('scroll', handleScroll)
   window.removeEventListener('keydown', handleKeydown)
 })
-
-computed: {
-  annotationProgress() {
-    const total = this.audioData.length;
-    const completed = this.audioData.filter(item => item.transcription.trim() !== '').length;
-    const percentage = total > 0 ? ((completed / total) * 100).toFixed(1) : 0;
-    return `${completed} segments annotés sur ${total} (${percentage}%)`;
-  }
-}
-
 
 </script>
 
