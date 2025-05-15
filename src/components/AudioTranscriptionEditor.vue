@@ -117,7 +117,7 @@ async function validate(id) {
     if (!res.ok) throw new Error('Erreur lors de la sauvegarde.')
     if (!file.history) file.history = []
     file.history.push({ transcription: file.transcription, timestamp: new Date().toISOString() })
-    successMessage.value = `✅ Transcription pour « ${file.name} » enregistrée !`
+    successMessage.value = `✅ Transcription « ${file.name} » validée !`
     setTimeout(() => (successMessage.value = ''), 3000)
   } catch (err) {
     console.error(err)
