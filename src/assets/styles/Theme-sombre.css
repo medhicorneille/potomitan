@@ -16,6 +16,7 @@
   --log-background: #181818;
 }
 
+/* Global reset */
 html, body, #app {
   background-color: var(--background-color);
   color: var(--text-color);
@@ -23,22 +24,19 @@ html, body, #app {
   padding: 0;
   font-family: system-ui, sans-serif;
   overflow-x: hidden;
+  overflow-y: auto;
 }
 
-body {
-  min-height: 100vh;
-}
-
+/* Main container full-width responsive */
 .app-container {
   background-color: var(--background-color);
   color: var(--text-color);
   padding: 6rem 1rem 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
-  position: relative;
-  min-height: 100%;
+  width: 100%;
+  box-sizing: border-box;
 }
 
+/* Sticky header always visible */
 .sticky-header {
   position: fixed;
   top: 0;
@@ -54,16 +52,42 @@ body {
   gap: 1rem;
 }
 
+/* Each audio/transcription card */
 .row {
   background-color: var(--card-background);
   border: 1px solid var(--border-color);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
   border-radius: 10px;
   padding: 2rem;
-  margin-bottom: 3rem;
+  margin: 0 auto 3rem;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Adjust for tablet/desktop */
+@media (min-width: 768px) {
+  .app-container {
+    padding: 6rem 2rem 2rem;
+  }
+  .row {
+    flex-direction: row;
+    max-width: 800px;
+  }
+}
+
+.filename {
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-color);
+}
+
+audio.audio-player {
+  width: 100%;
+  border-radius: 6px;
 }
 
 .transcription-col textarea {
@@ -131,18 +155,6 @@ body {
 
 .timestamp {
   color: var(--text-secondary);
-}
-
-.filename {
-  font-weight: bold;
-  font-size: 1.1rem;
-  margin-bottom: 0.5rem;
-  color: var(--text-color);
-}
-
-.audio-player {
-  width: 100%;
-  border-radius: 6px;
 }
 
 .navigation-controls {
