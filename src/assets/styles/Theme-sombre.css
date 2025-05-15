@@ -14,6 +14,7 @@
   --error-border: #f87171;
   --toast-success-bg: #1d3e30;
   --log-background: #181818;
+  --header-height: 5rem; /* Hauteur du header sticky */
 }
 
 /* Global reset */
@@ -27,11 +28,11 @@ html, body, #app {
   overflow-y: auto;
 }
 
-/* Main container full-width responsive */
+/* Main container with top padding to avoid header overlap */
 .app-container {
   background-color: var(--background-color);
   color: var(--text-color);
-  padding: 8rem 1rem 2rem; /* increased top padding to prevent overlap */
+  padding: calc(var(--header-height) + 1rem) 1rem 2rem;
   width: 100%;
   box-sizing: border-box;
 }
@@ -42,12 +43,27 @@ html, body, #app {
   top: 0;
   left: 0;
   right: 0;
+  height: var(--header-height);
   z-index: 999;
   background-color: var(--background-color);
   padding: 1rem;
   border-bottom: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Navigation and title inside header */
+.sticky-header .title {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: bold;
+}
+.sticky-header .navigation-controls {
+  width: 100%;
+  display: flex;
+  justify-content: center;
   align-items: center;
   gap: 1rem;
 }
@@ -67,10 +83,10 @@ html, body, #app {
   box-sizing: border-box;
 }
 
-/* Adjust for tablet/desktop */
+/* Responsive layout */
 @media (min-width: 768px) {
   .app-container {
-    padding: 8rem 2rem 2rem;
+    padding: calc(var(--header-height) + 2rem) 2rem 2rem;
   }
   .row {
     flex-direction: row;
@@ -79,6 +95,7 @@ html, body, #app {
 }
 
 .filename {
+  flex: 1 1 30%;
   font-weight: bold;
   font-size: 1.1rem;
   margin-bottom: 0.5rem;
@@ -86,11 +103,13 @@ html, body, #app {
 }
 
 audio.audio-player {
+  flex: 1 1 40%;
   width: 100%;
   border-radius: 6px;
 }
 
 .transcription-col textarea {
+  flex: 1 1 60%;
   background-color: var(--background-color);
   color: var(--text-color);
   border-color: var(--border-color);
@@ -155,14 +174,6 @@ audio.audio-player {
 
 .timestamp {
   color: var(--text-secondary);
-}
-
-.navigation-controls {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 2rem;
 }
 
 .nav-btn {
