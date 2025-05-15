@@ -3,6 +3,10 @@
 
   <div class="sticky-header">
     <h2 class="title">Fichiers Audio & Transcriptions</h2>
+    <div class="progress-indicator">
+      {{ completedCount }} segments annotés sur {{ totalCount }} — {{ percentage }}%
+    </div>
+
       <div v-if="successMessage" class="toast">{{ successMessage }}</div>
 
       <!-- Navigation rapide -->

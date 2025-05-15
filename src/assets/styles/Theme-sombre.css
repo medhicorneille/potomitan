@@ -72,6 +72,13 @@ html, body, #app {
   flex-wrap: wrap;
 }
 
+.progress-indicator {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  margin-top: 0.25rem;
+  text-align: center;
+}
+
 .row {
   background-color: var(--card-background);
   border: 1px solid var(--border-color);
