@@ -21,12 +21,8 @@ html, body, #app {
   color: var(--text-color);
   margin: 0;
   padding: 0;
-  height: 100%;
-  width: 100%;
   font-family: system-ui, sans-serif;
   overflow-x: hidden;
-  overflow-y: auto;
-  min-height: 100vh;
 }
 
 body {
