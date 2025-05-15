@@ -61,13 +61,16 @@ html, body, #app {
   margin: 0;
   font-size: 1.75rem;
   font-weight: bold;
+  text-align: center;
 }
+
 .sticky-header .navigation-controls {
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 1rem;
+  flex-wrap: wrap;
 }
 
 /* Each audio/transcription card */
