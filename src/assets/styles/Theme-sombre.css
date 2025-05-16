@@ -156,9 +156,10 @@ audio.audio-player {
   border-radius: 6px;
   font-size: 1.1rem;
   cursor: pointer;
-  margin-top: 0.75rem;
-  align-self: center;
+  margin-top: 1.5rem; /* plus d’espace */
+  align-self: flex-start; /* s’aligne mieux sous le champ texte */
 }
+
 
 .edit-btn:hover {
   background-color: var(--success-hover);
