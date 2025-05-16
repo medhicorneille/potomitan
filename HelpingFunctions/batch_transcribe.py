@@ -4,6 +4,19 @@ import json
 from datetime import datetime
 from tqdm import tqdm
 
+import torch
+
+# Vérifie si CUDA est disponible
+if torch.cuda.is_available():
+    device = torch.device("cuda")
+else:
+    device = torch.device("cpu")
+
+# Affiche le device sélectionné
+print(f"Using device: {device}")
+
+
+# It will print out the GPU that you are using.
 
 AUDIO_DIR = "public/audio"
 OUTPUT_FILE = "transcription_batch.json"
@@ -25,7 +38,7 @@ for filename in tqdm(os.listdir(AUDIO_DIR)):
         filepath = os.path.join(AUDIO_DIR, filename)
         print(f"🔊 Transcription de : {filename}")
         try:
-            result = model.transcribe(filepath, language="ht")
+            result = model.transcribe(filepath, language="ht", device = device)
 
             entry = {
                 "name": filename,
