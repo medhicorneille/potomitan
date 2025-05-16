@@ -7,10 +7,7 @@ from tqdm import tqdm
 import torch
 
 # Vérifie si CUDA est disponible
-if torch.cuda.is_available():
-    device = torch.device("cuda")
-else:
-    device = torch.device("cpu")
+device = "cuda" if torch.cuda.is_available() else "cpu"
 
 # Affiche le device sélectionné
 print(f"Using device: {device}")
