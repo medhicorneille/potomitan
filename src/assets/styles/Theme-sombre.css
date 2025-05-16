@@ -32,7 +32,7 @@ html, body, #app {
   color: var(--text-color);
   padding: calc(var(--header-height) + 1rem) 1rem 2rem;
   width: 100%;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   box-sizing: border-box;
   display: flex;
@@ -95,7 +95,7 @@ html, body, #app {
   flex-direction: column;
   gap: 1.5rem;
   width: 100%;
-  max-width: 800px;
+  max-width: 1000px;
   box-sizing: border-box;
   align-items: stretch;
 }
@@ -103,6 +103,17 @@ html, body, #app {
 @media (min-width: 768px) {
   .app-container {
     padding: calc(var(--header-height) + 2rem) 2rem 2rem;
+  }
+
+  .row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 2rem;
+  }
+
+  .transcription-col {
+    flex: 1;
   }
 }
 
