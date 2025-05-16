@@ -1,10 +1,21 @@
 require('dotenv').config(); // Pour utiliser en local
-const { Pool } = require('pg')
+const { Pool } = require('pg');
 
-const pool = new Pool({
+// Charger les variables d'environnement uniquement en local
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
+
+const poolConfig = {
   connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false } // requis pour Render
-})
+};
+
+// Ajoutez la configuration SSL uniquement pour l'environnement distant
+if (process.env.NODE_ENV === 'production') {
+  poolConfig.ssl = { rejectUnauthorized: false };
+}
+
+const pool = new Pool(poolConfig);
 
 
 const express = require('express')
