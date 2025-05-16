@@ -219,3 +219,17 @@ audio.audio-player {
   font-weight: 500;
   font-size: 1rem;
 }
+
+.sort-menu {
+  margin: 1rem auto;
+  text-align: center;
+}
+
+.sort-menu select {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background-color: var(--card-background);
+  color: var(--text-color);
+}
