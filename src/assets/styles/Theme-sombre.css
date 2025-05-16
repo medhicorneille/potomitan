@@ -97,22 +97,16 @@ html, body, #app {
   width: 100%;
   max-width: 800px;
   box-sizing: border-box;
-  align-items: center;
+  align-items: stretch;
 }
 
 @media (min-width: 768px) {
   .app-container {
     padding: calc(var(--header-height) + 2rem) 2rem 2rem;
   }
-  .row {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: flex-start;
-  }
 }
 
 .filename {
-  flex: 1 1 30%;
   font-weight: bold;
   font-size: 1.1rem;
   margin-bottom: 0.5rem;
@@ -121,13 +115,12 @@ html, body, #app {
 }
 
 audio.audio-player {
-  flex: 1 1 40%;
   width: 100%;
   border-radius: 6px;
+  margin-bottom: 1rem;
 }
 
 .transcription-col textarea {
-  flex: 1 1 60%;
   background-color: var(--background-color);
   color: var(--text-color);
   border-color: var(--border-color);
@@ -180,6 +173,7 @@ audio.audio-player {
   padding: 1rem;
   border-radius: 6px;
   font-size: 0.95rem;
+  margin-top: 1rem;
 }
 
 .history-title {
