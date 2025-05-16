@@ -35,7 +35,7 @@ for filename in tqdm(os.listdir(AUDIO_DIR)):
         filepath = os.path.join(AUDIO_DIR, filename)
         print(f"🔊 Transcription de : {filename}")
         try:
-            result = model.transcribe(filepath, language="ht", device = device)
+            result = model.transcribe(filepath, language="ht")
 
             entry = {
                 "name": filename,
