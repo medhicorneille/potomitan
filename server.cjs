@@ -1,4 +1,3 @@
-require('dotenv').config(); // Pour utiliser en local
 const { Pool } = require('pg');
 
 // Charger les variables d'environnement uniquement en local
