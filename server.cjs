@@ -1,3 +1,4 @@
+require('dotenv').config(); // Pour utiliser en local
 const { Pool } = require('pg')
 
 const pool = new Pool({
