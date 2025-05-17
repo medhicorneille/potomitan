@@ -6,14 +6,6 @@
 
       <div v-if="successMessage" class="toast">{{ successMessage }}</div>
 
-      <div class="sort-menu">
-        <label for="sort">Trier par : </label>
-        <select id="sort" v-model="sortOption" @change="sortSegments">
-          <option value="filename">Nom du fichier</option>
-          <option value="timestamp">Date de transcription</option>
-        </select>
-      </div>
-
       <!-- Navigation rapide -->
       <div class="navigation-controls" v-if="visibleFiles.length">
         <button @click="goToPrevious" :disabled="!hasPrevious" class="nav-btn">← Précédent</button>
