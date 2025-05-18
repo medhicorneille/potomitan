@@ -2,9 +2,13 @@ import os
 import json
 import logging
 import torch
+import filetype
+import argparse
 
+from pydub import AudioSegment
 
 from pyannote.audio import Pipeline
+from pyannote.audio.pipelines.utils.hook import ProgressHook
 
 # Prioriser les variables d'environnement système
 HUGGING_FACE_KEY = os.getenv("HuggingFace_API_KEY")
@@ -13,19 +17,13 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY_MCF")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 if torch.cuda.is_available():
     logging.info(f"GPU trouvé! on utilise CUDA. Device: {device}")
-
 else:
     logging.info(f"Pas de GPU de disponible... Device: {device}")
 
-
-
-# Charger les modèles
-# diarization_model = Pipeline.from_pretrained("pyannote/speaker-diarization")
 def load_pipeline_diarization(model):
     pipeline_diarization = Pipeline.from_pretrained(
         model,
-        # cache_dir= HF_cache,
-        use_auth_token = HUGGING_FACE_KEY,
+        use_auth_token=HUGGING_FACE_KEY,
     )
 
     if torch.cuda.is_available():
@@ -35,120 +33,81 @@ def load_pipeline_diarization(model):
 
     return pipeline_diarization
 
-diarization_model = load_pipeline_diarization("pyannote/speaker-diarization-3.1")
-
-
-
-file_path = f"/tmp/{file.filename}"
-# Détection de l'extension du fichier
-file_extension = os.path.splitext(file_path)[1].lower()
-logging.info(f"Extension détectée {file_extension}.")
-
-
-try:
-    # Sauvegarder temporairement le fichier uploadé
-    with open(file_path, "wb") as f:
-        f.write(await file.read())
-    logging.info(f"Fichier {file.filename} sauvegardé avec succès.")
+def detect_file_type(file_path):
+    file_extension = os.path.splitext(file_path)[1].lower()
+    logging.info(f"Extension détectée {file_extension}.")
 
     file_type = filetype.guess(file_path)
     logging.info(f"Type de fichier : {file_type.mime}, Extension : {file_type.extension}")
 
-    extraction_status = json.dumps({'extraction_audio_status': 'extraction_audio_ongoing', 'message': 'Extraction audio en cours ...'})
+    return file_extension, file_type
 
-    # Si le fichier est un fichier audio (formats courants)
+def extract_audio(file_path, file_extension, file_type):
+    extraction_status = {'extraction_audio_status': 'extraction_audio_ongoing', 'message': 'Extraction audio en cours ...'}
+    logging.info(extraction_status)
+
     if file_extension in ['.mp3', '.wav', '.aac', '.ogg', '.flac', '.m4a']:
         logging.info(f"fichier audio détecté: {file_extension}.")
-
         audio = AudioSegment.from_file(file_path)
+    else:
+        raise ValueError("Format de fichier non supporté.")
 
+    return audio
 
-    elif file_extension in ['.mp4', '.mov', '.3gp', '.mkv']:
-        logging.info(f"fichier vidéo détecté: {file_extension}.")
-        VideoFileClip(file_path)
-        logging.info("Extraction Audio démarrée ...")
+def diarize_audio(audio_path, diarization_model, output_dir):
+    logging.info(f"Démarrage de la diarisation du fichier {audio_path}")
+    file_name = os.path.basename(audio_path)
 
-        logging.info(extraction_status)
+    audio = AudioSegment.from_file(audio_path)
 
-        audio = AudioSegment.from_file(file_path, format=file_type.extension)
-
-        logging.info(extraction_status)
-
-    logging.info(f"Conversion du {file.filename} en mono 16kHz.")
     audio = audio.set_channels(1)
     audio = audio.set_frame_rate(16000)
-    audio_path = f"{file_path}.wav"
-    logging.info(f"Sauvegarde de la piste audio dans {audio_path}.")
+
     audio.export(audio_path, format="wav")
 
-    # Vérification si le fichier existe
-    if not os.path.exists(audio_path):
-        logging.error(f"Le fichier {audio_path} n'existe pas.")
-
     # Étape 1 : Diarisation
-    logging.info(f"Démarrage de la diarisation du fichier {audio_path}")
+    with ProgressHook() as hook:
+        logging.debug(f"Diarization démarrée")
+        diarization = diarization_model(audio_path, hook=hook)
+        logging.debug(f"Diarization terminée {diarization}")
 
-    async def live_process_audio():
-        extraction_status = json.dumps({'extraction_audio_status': 'extraction_audio_done', 'message': 'Extraction audio terminée!'})
-        yield f"{extraction_status}\n"
-        logging.info(extraction_status)
+    segments = []
 
-        # Envoi du statut "en cours"
-        start_diarization = json.dumps({'status': 'diarization_processing', 'message': 'Séparation des voix en cours, patience est mère de vertu ...'})
-        yield f"{start_diarization}\n"
-        logging.info(start_diarization)
+    # total_turns = len(list(diarization.itertracks(yield_label=True))) 
+    # for turn, _, speaker in tqdm(diarization.itertracks(yield_label=True), total=total_turns, desc="Processing turns"):
+    for turn, _, speaker in diarization.itertracks(yield_label=True):
 
-        logging.debug(f"Diarization démarrée pour le fichier {audio_path}")
+        start_ms = int(turn.start * 1000)  # Convertir de secondes en millisecondes
+        end_ms = int(turn.end * 1000)
 
-        try:
-            with ProgressHook() as hook:
-                diarization = diarization_model(audio_path, hook=hook)
-            # diarization = diarization_model(audio_path)
-        except Exception as e:
-            logging.error(f"Erreur pendant la diarisation :-( : {str(e)}")
+        # Extraire le segment audio correspondant au speaker
+        segment_audio = audio[start_ms:end_ms]
 
-        # Envoi final du statut pour indiquer la fin
-        end_diarization = json.dumps({'status': 'diarization_done', 'message': 'Séparation des voix terminée.'})
-        yield f"{end_diarization}\n"
+        segment_path = f"{output_dir}/{file_name}_segment_{start_ms}_{end_ms}.wav"
+        segment_audio.export(segment_path, format="wav")
 
-        logging.debug(f"Diarization terminée")
+        segments.append({
+            "speaker": speaker,
+            "start_time": turn.start,
+            "end_time": turn.end,
+            "file": segment_path
+        })
+        logging.info("Diarization terminée.")
+    
+    print(f"segments: {segments}")
 
-        # diarization_json = convert_tracks_to_json(diarization)
+    return {"segments": segments}
 
-        try:
-            diarization_json = convert_tracks_to_json(diarization)
-            logging.info(f"Taille des données de diarisation en JSON : {len(json.dumps(diarization_json))} octets")
-        except Exception as e:
-            logging.error(f"Erreur pendant la conversion de la diarisation en JSON : {str(e)}")
-            yield json.dumps({"status": "error", "message": f"Erreur pendant la conversion en JSON : {str(e)}"}) + "\n"
-            return
+def main(audio_path, output_dir):
+    diarization_model = load_pipeline_diarization("pyannote/speaker-diarization-3.1")
+    file_extension, file_type = detect_file_type(audio_path)
+    audio = extract_audio(audio_path, file_extension, file_type)
+    diarize_audio(audio_path, diarization_model, output_dir)
 
-        logging.debug(f"Résultat de la diarization {diarization_json}")
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Process a file for audio extraction and diarization.")
+    parser.add_argument("file_path", type=str, help="Path to the file to process")
+    parser.add_argument("output_dir", type=str, help="Directory to save the output audio files")
+    args = parser.parse_args()
 
-        logging.info(end_diarization)
-
-        diarization_json = convert_tracks_to_json(diarization)
-
-        # Envoyer la diarisation complète d'abord
-        logging.info(f"{json.dumps({'diarization': diarization_json})}")
-        yield f"{json.dumps({'diarization': diarization_json})}\n"
-
-        # Exporter les segments pour chaque locuteur
-        total_chunks = len(list(diarization.itertracks(yield_label=True))) 
-        logging.info(f"total_turns: {total_chunks}")
-        
-        turn_number = 0
-        for turn, _, speaker in diarization.itertracks(yield_label=True):
-            turn_number += 1
-            logging.info(f"Tour {turn_number}/{total_chunks}")
-
-            # Étape 2 : Transcription pour chaque segment
-            start_ms = int(turn.start * 1000)  # Convertir de secondes en millisecondes
-            end_ms = int(turn.end * 1000)
-
-            # Extraire le segment audio correspondant au speaker
-            segment_audio = audio[start_ms:end_ms]
-
-            # Sauvegarder le segment temporairement pour Whisper
-            segment_path = f"/tmp/segment_{start_ms}_{end_ms}.wav"
-            segment_audio.export(segment_path, format="wav")
+    main(args.file_path, args.output_dir)
