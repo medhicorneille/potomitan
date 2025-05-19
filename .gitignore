@@ -23,3 +23,17 @@ dist-ssr
 *.sln
 *.sw?
 .env
+Mp3
+.gitignore
+pretrained_models/2stems/._checkpoint
+pretrained_models/2stems/.probe
+pretrained_models/2stems/checkpoint
+pretrained_models/2stems/model.data-00000-of-00001
+pretrained_models/2stems/model.index
+pretrained_models/2stems/model.meta
+
+# Ignorer le dossier .venv
+.venv/
+
+.gitignore
+
