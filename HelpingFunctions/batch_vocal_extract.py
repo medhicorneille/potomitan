@@ -1,10 +1,23 @@
 import argparse
 import os
 
+import hashlib
+import random
+import string
+
 from tqdm import tqdm
 
 from spleeter.separator import Separator
 from spleeter.audio.adapter import AudioAdapter
+
+def generate_random_hash(length=8):
+    # Générer une chaîne aléatoire de caractères
+    random_string = ''.join(random.choices(string.ascii_letters + string.digits, k=length))
+    # Créer un hash SHA-256 de la chaîne aléatoire
+    hash_object = hashlib.sha256(random_string.encode())
+    # Retourner les premiers 8 caractères du hash
+    return hash_object.hexdigest()[:length]
+
 
 def extract_vocals(audio_path, output_dir):
     """
@@ -31,7 +44,8 @@ def extract_vocals(audio_path, output_dir):
     vocals = prediction['vocals']
 
     # Sauvegarder la partie vocale
-    output_path = os.path.join(output_dir, os.path.basename(audio_path).replace('.mp3', '_vocals.wav'))
+    random_hash = generate_random_hash()
+    output_path = os.path.join(output_dir, f'{random_hash}_vocals.wav')
     audio_loader.save(output_path, vocals, sample_rate)
 
     print(f"La partie vocale a été extraite et sauvegardée dans le fichier '{output_path}'.")
