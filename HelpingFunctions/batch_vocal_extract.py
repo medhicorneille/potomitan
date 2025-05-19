@@ -1,6 +1,8 @@
 import argparse
 import os
 
+from tqdm import tqdm
+
 from spleeter.separator import Separator
 from spleeter.audio.adapter import AudioAdapter
 
@@ -42,8 +44,8 @@ def process_directory(input_dir, output_dir):
     :param output_dir: Répertoire de sortie pour les fichiers séparés.
     """
     # Lister tous les fichiers dans le répertoire d'entrée
-    for filename in os.listdir(input_dir):
-        if filename.endswith('.mp3'):
+    for filename in tqdm(os.listdir(input_dir), desc="Processing files"):
+        if filename.lower().endswith(('.mp3', '.wav')):
             audio_path = os.path.join(input_dir, filename)
             extract_vocals(audio_path, output_dir)
 

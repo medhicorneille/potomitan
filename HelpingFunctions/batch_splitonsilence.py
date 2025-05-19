@@ -6,6 +6,8 @@ import numpy as np
 import hashlib
 import random
 import string
+from tqdm import tqdm
+
 
 def generate_random_hash(length=8):
     # Générer une chaîne aléatoire de caractères
@@ -53,7 +55,7 @@ def process_directory(input_dir, output_dir, silence_thresh=-40, min_silence_len
         os.makedirs(output_dir)
 
     # Parcourir tous les fichiers dans le répertoire d'entrée
-    for filename in os.listdir(input_dir):
+    for file_name in tqdm(os.listdir(input_dir)):
         if filename.endswith(".wav") or filename.endswith(".mp3"):  # Ajoutez d'autres extensions si nécessaire
             audio_path = os.path.join(input_dir, filename)
             split_audio_on_silence(audio_path, output_dir, silence_thresh, min_silence_len, max_segment_duration, min_segment_duration)

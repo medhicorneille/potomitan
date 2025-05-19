@@ -5,6 +5,8 @@ import torch
 import filetype
 import argparse
 
+from tqdm import tqdm
+
 from pydub import AudioSegment
 
 from pyannote.audio import Pipeline
@@ -92,7 +94,7 @@ def diarize_audio(audio_path, diarization_model, output_dir):
         })
         logging.info("Diarization terminée.")
 
-    print(f"segments: {segments}")
+    logging.info(f"segments: {segments}")
 
     return {"segments": segments}
 
@@ -104,7 +106,7 @@ def process_audio_files(input_dir, output_dir):
         os.makedirs(output_dir)
 
     # Parcourir tous les fichiers du répertoire d'entrée
-    for file_name in os.listdir(input_dir):
+    for file_name in tqdm(os.listdir(input_dir)):
         file_path = os.path.join(input_dir, file_name)
 
         # Vérifier si c'est un fichier
@@ -124,8 +126,8 @@ def main(input_dir, output_dir):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process all audio files in a directory for audio extraction and diarization.")
-    parser.add_argument("--input_dir", type=str, help="Directory containing the audio files to process")
-    parser.add_argument("--output_dir", type=str, help="Directory to save the output audio files")
+    parser.add_argument("input_dir", type=str, help="Directory containing the audio files to process")
+    parser.add_argument("output_dir", type=str, help="Directory to save the output audio files")
     args = parser.parse_args()
 
     main(args.input_dir, args.output_dir)
