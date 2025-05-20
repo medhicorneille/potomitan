@@ -18,12 +18,17 @@
         <audio :src="file.url" controls />
 
         <!-- Notation de la qualité de la transcription -->
-        <star-rating
-          :star-size="24"
-          v-model="file.rating"
-          :show-rating="false"
-          @rating-selected="onRatingSelected(file)"
-        />
+        <div class="star-rating">
+          <span
+            v-for="n in 5"
+            :key="n"
+            class="star"
+            :class="{ filled: n <= file.rating }"
+            @click="onRatingSelected(file, n)"
+          >
+            ★
+          </span>
+        </div>
 
         <!-- Zone de transcription -->
         <textarea
@@ -38,11 +43,9 @@
 
 <script>
 import axios from 'axios';
-import StarRating from 'vue-star-rating';
 
 export default {
   name: 'AudioTranscriptionEditor',
-  components: { StarRating },
   data() {
     return {
       audioFiles: [],
@@ -64,7 +67,7 @@ export default {
     },
     currentIndexDisplay() {
       return this.currentIndex;
-    },
+    }
   },
   methods: {
     fetchAudioFiles() {
@@ -84,9 +87,11 @@ export default {
     goToNext() {
       if (this.hasNext) this.currentIndex++;
     },
-    onRatingSelected(file) {
-      // Met à jour uniquement la note dans la base de données
-      axios.post(`/api/save-rating/${file.id}`, { rating: file.rating })
+    onRatingSelected(file, rating) {
+      // Met à jour localement
+      file.rating = rating;
+      // Enregistre la note dans la base de données
+      axios.post(`/api/save-rating/${file.id}`, { rating })
         .then(() => {
           this.successMessage = 'Note enregistrée !';
           setTimeout(() => this.successMessage = '', 2000);
@@ -177,5 +182,14 @@ export default {
 .star-rating {
   display: flex;
   align-items: center;
+}
+.star {
+  font-size: 24px;
+  cursor: pointer;
+  color: #ccc;
+  margin-right: 4px;
+}
+.star.filled {
+  color: gold;
 }
 </style>
