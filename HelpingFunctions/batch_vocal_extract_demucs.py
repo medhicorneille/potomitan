@@ -16,9 +16,14 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"💻 Utilisation de : {DEVICE.upper()}")
 
 
-def generate_random_hash(length=8):
-    random_string = ''.join(random.choices(string.ascii_letters + string.digits, k=length))
-    hash_object = hashlib.sha256(random_string.encode())
+def generate_random_hash(file_path, length=8):
+    # Extraire le nom de fichier à partir du chemin complet
+    file_name = os.path.basename(file_path)
+
+    # Créer un objet hash SHA-256 à partir du nom du fichier
+    hash_object = hashlib.sha256(file_name.encode())
+
+    # Retourner le hash sous forme hexadécimale, tronqué à la longueur spécifiée
     return hash_object.hexdigest()[:length]
 
 def extract_vocals(audio_path, output_dir):
@@ -47,7 +52,7 @@ def extract_vocals(audio_path, output_dir):
         return
 
     # Générer un nom de fichier de sortie unique
-    random_hash = generate_random_hash()
+    random_hash = generate_random_hash(audio_path)
     final_output_path = os.path.join(output_dir, f'{random_hash}_vocals.wav')
 
     # Créer le dossier de sortie s’il n’existe pas

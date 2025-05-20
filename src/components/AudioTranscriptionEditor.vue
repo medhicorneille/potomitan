@@ -1,8 +1,7 @@
 <template>
   <div class="app-container">
-
-  <div class="sticky-header">
-    <h2 class="title">Fichiers Audio & Transcriptions</h2>
+    <div class="sticky-header">
+      <h2 class="title">Fichiers Audio & Transcriptions</h2>
 
       <div v-if="successMessage" class="toast">{{ successMessage }}</div>
 
@@ -17,15 +16,40 @@
     <div v-for="file in visibleFiles" :key="file.id" class="row">
       <div class="column audio-col">
         <p class="filename">{{ file.name }}</p>
+          <div class="thumb-rating">
+            <span
+              class="thumb"
+              :class="{ selected: file.thumbVote === 'up' }"
+              @click="onThumbSelected(file, true)"
+            >👍</span>
+            <span
+              class="thumb"
+              :class="{ selected: file.thumbVote === 'down' }"
+              @click="onThumbSelected(file, false)"
+            >👎</span>
+          </div>        
         <audio
           :ref="el => audioRefs[file.id] = el"
-          :src="file.src"
+          :src="file.url"
           controls
           class="audio-player"
           @play="currentFocusedId = file.id"
         ></audio>
       </div>
       <div class="column transcription-col">
+        <!-- Système de notation par étoiles -->
+        <div class="star-rating">
+          <span
+            v-for="n in 5"
+            :key="n"
+            class="star"
+            :class="{ filled: n <= file.rating }"
+            @click="onRatingSelected(file, n)"
+          >
+            ★
+          </span>
+        </div>
+
         <textarea
           v-model="file.transcription"
           :class="{ empty: file.transcription === '' }"
@@ -34,6 +58,7 @@
           placeholder="Veuillez entrer la transcription ici..."
         ></textarea>
         <button @click="validate(file.id)" class="edit-btn">Valider</button>
+
         <details v-if="file.history && file.history.length > 1" class="history-log">
           <summary class="history-title">🕒 Historique des modifications</summary>
           <ul>
@@ -72,19 +97,12 @@ const hasNext = computed(() => currentIndexDisplay.value < audioFiles.value.leng
 
 function goToPrevious() {
   const prev = audioFiles.value[currentIndexDisplay.value - 1]
-  if (prev) {
-    focusTextarea(prev.id)
-  }
+  if (prev) focusTextarea(prev.id)
 }
 
 function goToNext() {
   const next = audioFiles.value[currentIndexDisplay.value + 1]
-  if (next) {
-    if (!visibleFiles.value.find(f => f.id === next.id)) {
-      visibleFiles.value.push(next)
-    }
-    focusTextarea(next.id)
-  }
+  if (next) focusTextarea(next.id)
 }
 
 function focusTextarea(id) {
@@ -102,7 +120,6 @@ function loadMore() {
 }
 
 function handleScroll() {
-  // Quand on atteint le bas de la page, charger plus
   if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
     loadMore()
   }
@@ -127,6 +144,23 @@ async function validate(id) {
   }
 }
 
+async function onRatingSelected(file, rating) {
+  file.rating = rating
+  try {
+    const res = await fetch(`/api/save-rating/${file.id}`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rating })
+    })
+    if (!res.ok) throw new Error('Erreur enregistrement note')
+    successMessage.value = `⭐ Note de ${rating} enregistrée !`
+    setTimeout(() => (successMessage.value = ''), 2000)
+  } catch (err) {
+    console.error(err)
+    successMessage.value = `❌ ${err.message}`
+    setTimeout(() => (successMessage.value = ''), 3000)
+  }
+}
+
 function handleKeydown(e) {
   if (e.code === 'Space' && document.activeElement.tagName !== 'TEXTAREA') {
     e.preventDefault()
@@ -142,13 +176,10 @@ function handleKeydown(e) {
 }
 
 onMounted(async () => {
-  // 1. Charge d’abord tous les fichiers
   const res = await fetch('/api/audio-files')
   audioFiles.value = await res.json()
-  // 2. Charge la première fournée
   loadMore()
   window.addEventListener('scroll', handleScroll, { passive: true })
-
   window.addEventListener('keydown', handleKeydown)
 })
 
@@ -156,32 +187,27 @@ onBeforeUnmount(() => {
   window.removeEventListener('scroll', handleScroll)
   window.removeEventListener('keydown', handleKeydown)
 })
-
 </script>
 
 <style scoped>
 .navigation-controls {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
+  display: flex; justify-content: center; align-items: center; gap: 1rem; margin-bottom: 1rem;
 }
 .nav-btn {
-  background-color: var(--success-color);
-  border: none;
-  padding: 0.5rem 1rem;
-  color: white;
-  cursor: pointer;
-  border-radius: 4px;
-  font-weight: 500;
+  background-color: var(--success-color); border: none; padding: 0.5rem 1rem; color: white; cursor: pointer; border-radius: 4px; font-weight: 500;
 }
-.nav-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-.nav-status {
-  color: var(--text-color);
-  font-weight: 500;
-}
+.nav-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.nav-status { color: var(--text-color); font-weight: 500; }
+.audio-player { width: 100%; margin-top: 0.5rem; }
+.row { display: flex; gap: 1rem; margin-bottom: 2rem; }
+.audio-col { flex: 1; }
+.transcription-col { flex: 2; display: flex; flex-direction: column; gap: 0.5rem; }
+.transcription-col textarea { width: 100%; min-height: 100px; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; }
+.edit-btn { align-self: start; background: var(--btn-bg-color); color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; }
+.history-log { margin-top: 0.5rem; }
+.star-rating { display: flex; align-items: center; margin-bottom: 0.5rem; }
+.star { font-size: 24px; cursor: pointer; color: #ccc; margin-right: 4px; }
+.star.filled { color: gold; }
+.toast { background: #4caf50; color: white; padding: 0.5rem 1rem; border-radius: 4px; animation: fade-in-out 2s ease-in-out; position: sticky; top: 4rem; }
+@keyframes fade-in-out { 0%,100% { opacity: 0; } 10%,90% { opacity: 1; } }
 </style>
