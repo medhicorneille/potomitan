@@ -14,10 +14,13 @@ const poolConfig = {
   connectionString: process.env.DATABASE_URL,
 };
 
-// Ajouter SSL uniquement en production (utile pour Render, Heroku, etc.)
-if (process.env.NODE_ENV === 'production') {
+// Activer SSL si l'URL Render le nécessite (par exemple, contient ".render.com")
+if (process.env.DATABASE_URL?.includes('render.com')) {
   poolConfig.ssl = { rejectUnauthorized: false };
 }
+
+console.log('📡 Connexion à la base de données :', poolConfig.connectionString);
+console.log('🔐 SSL activé ?', !!poolConfig.ssl);
 
 const pool = new Pool(poolConfig);
 
