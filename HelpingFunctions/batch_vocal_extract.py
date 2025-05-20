@@ -7,8 +7,12 @@ import string
 
 from tqdm import tqdm
 
-from spleeter.separator import Separator
-from spleeter.audio.adapter import AudioAdapter
+# from spleeter.separator import Separator
+# from spleeter.audio.adapter import AudioAdapter
+
+import torch
+from demucs import pretrained
+from demucs.audio import AudioFile, save_audio
 
 def generate_random_hash(length=8):
     # Générer une chaîne aléatoire de caractères
@@ -26,30 +30,34 @@ def extract_vocals(audio_path, output_dir):
     :param input_audio_path: Chemin vers le fichier MP3 d'entrée.
     :param output_dir: Répertoire de sortie pour les fichiers séparés.
     """
-    # Créer le répertoire de sortie s'il n'existe pas
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+    try:
+        # Créer le répertoire de sortie s'il n'existe pas
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
 
-    # Initialiser le séparateur de sources
-    separator = Separator('spleeter:2stems')
+        # Charger le modèle Demucs
+        model = pretrained.get_model('demucs')
 
-    # Charger l'audio
-    audio_loader = AudioAdapter.default()
-    waveform, sample_rate = audio_loader.load(audio_path, sample_rate=16000)
+        # Charger l'audio
+        audio_file = AudioFile(audio_path)
+        waveform = audio_file.read(streaming=False)
+        sample_rate = audio_file.sample_rate
 
-    # Séparer les sources
-    prediction = separator.separate(waveform)
+        # Séparer les sources
+        sources = model.separate(waveform[None])
 
-    # Sauvegarder les sources séparées
-    vocals = prediction['vocals']
+        # Sauvegarder la partie vocale
+        vocals = sources[0, 0].cpu().numpy()
+        random_hash = generate_random_hash()
+        output_path = os.path.join(output_dir, f'{random_hash}_vocals.wav')
+        save_audio(output_path, vocals, sample_rate)
 
-    # Sauvegarder la partie vocale
-    random_hash = generate_random_hash()
-    output_path = os.path.join(output_dir, f'{random_hash}_vocals.wav')
-    audio_loader.save(output_path, vocals, sample_rate)
+        print(f"La partie vocale a été extraite et sauvegardée dans le fichier '{output_path}'.")
 
-    print(f"La partie vocale a été extraite et sauvegardée dans le fichier '{output_path}'.")
+    except Exception as e:
+        print(f"Une erreur s'est produite : {e}")
 
+        
 def process_directory(input_dir, output_dir):
     """
     Traite tous les fichiers MP3 dans un répertoire donné.
