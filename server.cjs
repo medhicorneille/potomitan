@@ -88,7 +88,7 @@ app.get('/api/init-db', async (req, res) => {
     res.send('✅ Table transcriptions initialisée avec succès.');
   } catch (err) {
     console.error(err);
-    res.status(500).send('❌ Erreur lors de l'initialisation de la table.');
+    res.status(500).send("❌ Erreur lors de l'initialisation de la table.");
   }
 });
 
