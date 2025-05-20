@@ -1,47 +1,52 @@
-// require('dotenv').config();
 const fs = require('fs');
+const path = require('path');
 const { Pool } = require('pg');
-
-//const pool = new Pool({
-//  connectionString: process.env.DATABASE_URL,
-//  ssl: { rejectUnauthorized: false }
-//});
 
 // Charger les variables d'environnement uniquement en local
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
 }
 
+// Construire un chemin absolu compatible Windows/Linux
+const dataFilePath = path.resolve(__dirname, 'transcription_batch.json');
+
 const poolConfig = {
   connectionString: process.env.DATABASE_URL,
 };
 
-// Ajoutez la configuration SSL uniquement pour l'environnement distant
+// Ajouter SSL uniquement en production (utile pour Render, Heroku, etc.)
 if (process.env.NODE_ENV === 'production') {
   poolConfig.ssl = { rejectUnauthorized: false };
 }
 
 const pool = new Pool(poolConfig);
 
-
 async function updateBatch() {
-  const data = JSON.parse(fs.readFileSync('transcription_batch.json', 'utf-8'));
+  let data;
+
+  try {
+    const fileContent = fs.readFileSync(dataFilePath, 'utf-8');
+    data = JSON.parse(fileContent);
+  } catch (err) {
+    console.error('❌ Erreur lors de la lecture ou du parsing du fichier JSON :', err.message);
+    return;
+  }
 
   for (const item of data) {
     const { name, transcription, timestamp, author } = item;
 
     try {
-      const result = await pool.query(
+      await pool.query(
         `INSERT INTO transcriptions (filename, transcription, timestamp, author)
-        VALUES ($1, $2, $3, $4)
-        ON CONFLICT (filename, transcription)
-        DO NOTHING;`,
+         VALUES ($1, $2, $3, $4)
+         ON CONFLICT (filename, transcription)
+         DO NOTHING;`,
         [name, transcription, timestamp, author || 'whisper-large-v3']
       );
 
-      console.log(`✅ Donnée insérée ou mise à jour pour : ${name}`);
+      console.log(`✅ Donnée insérée ou ignorée (doublon) : ${name}`);
     } catch (err) {
-      console.error(`❌ Oups cette proposition a déjà) été faite ${name} :`, err.message);
+      console.error(`❌ Erreur d'insertion pour ${name} :`, err.message);
     }
   }
 
