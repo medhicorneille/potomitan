@@ -10,6 +10,12 @@ import torch
 import demucs.separate
 import shlex
 
+
+# Détecte automatiquement GPU ou CPU
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+print(f"💻 Utilisation de : {DEVICE.upper()}")
+
+
 def generate_random_hash(length=8):
     random_string = ''.join(random.choices(string.ascii_letters + string.digits, k=length))
     hash_object = hashlib.sha256(random_string.encode())
@@ -21,7 +27,9 @@ def extract_vocals(audio_path, output_dir):
     """
     # Lancer la séparation avec Demucs
     try:
-        command = f'--two-stems vocals -n mdx_extra "{audio_path}"'
+        #command = f'--two-stems vocals -n mdx_extra "{audio_path}"'
+        command = f'--two-stems vocals -n mdx_extra --device {DEVICE} "{audio_path}"'
+
         demucs.separate.main(shlex.split(command))
     except Exception as e:
         print(f"Erreur lors de la séparation de {audio_path} : {e}")
