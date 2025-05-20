@@ -1030,5 +1030,23 @@
     "transcription": " videye",
     "author": "whisper-large-v3",
     "timestamp": "2025-05-20T22:11:31.532580"
+  },
+  {
+    "name": "a9e96d9d_vocals.wav",
+    "transcription": " Ha ha ha ha ha, anka konstatisa.",
+    "author": "whisper-large-v3",
+    "timestamp": "2025-05-20T22:11:54.747562"
+  },
+  {
+    "name": "ac1a6e74_vocals.wav",
+    "transcription": " Epi yo touve, sakifo yo. Ni kaka bef, ni gato.",
+    "author": "whisper-large-v3",
+    "timestamp": "2025-05-20T22:12:21.899627"
+  },
+  {
+    "name": "ad011e7a_vocals.wav",
+    "transcription": " Maman ou papa, mwen baten papa, papa an de yambo, alo anpren maman mwen amene fwe, mwen amene di jisa, e apre sa wap an kondisyon an fianse yavey.",
+    "author": "whisper-large-v3",
+    "timestamp": "2025-05-20T22:14:27.683539"
   }
 ]
