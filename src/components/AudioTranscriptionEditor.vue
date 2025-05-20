@@ -2,7 +2,6 @@
   <div class="app-container">
     <div class="sticky-header">
       <h2 class="title">Fichiers Audio & Transcriptions</h2>
-
       <div v-if="successMessage" class="toast">{{ successMessage }}</div>
 
       <!-- Navigation rapide -->
@@ -13,49 +12,65 @@
       </div>
     </div>
 
-    <div v-for="file in visibleFiles" :key="file.id" class="row">
-      <div class="column audio-col">
-        <p class="filename">{{ file.name }}</p>
-        <audio
-          :ref="el => audioRefs[file.id] = el"
-          :src="file.url"
-          controls
-          class="audio-player"
-          @play="currentFocusedId = file.id"
-        ></audio>
-      </div>
-      <div class="column transcription-col">
-        <!-- Système de notation par étoiles -->
-        <div class="star-rating">
-          <span
-            v-for="n in 5"
-            :key="n"
-            class="star"
-            :class="{ filled: n <= file.rating }"
-            @click="onRatingSelected(file, n)"
-          >
-            ★
-          </span>
+    <div class="audio-transcription-list">
+      <div v-for="file in visibleFiles" :key="file.id" class="row">
+        <div class="column audio-col">
+          <div class="filename-row">
+            <p class="filename">{{ file.name }}</p>
+            <!-- Pouces vers le haut/bas pour feedback binaire -->
+            <div class="thumb-rating">
+              <span
+                class="thumb"
+                :class="{ selected: file.thumbVote === 'up' }"
+                @click="onThumbSelected(file, true)"
+              >👍</span>
+              <span
+                class="thumb"
+                :class="{ selected: file.thumbVote === 'down' }"
+                @click="onThumbSelected(file, false)"
+              >👎</span>
+            </div>
+          </div>
+          <audio
+            :ref="el => audioRefs[file.id] = el"
+            :src="file.url"
+            controls
+            class="audio-player"
+            @play="currentFocusedId = file.id"
+          />
         </div>
+        <div class="column transcription-col">
+          <!-- Étoiles de notation -->
+          <star-rating
+            :star-size="24"
+            v-model="file.rating"
+            :show-rating="false"
+            @rating-selected="onRatingSelected(file)"
+          />
 
-        <textarea
-          v-model="file.transcription"
-          :class="{ empty: file.transcription === '' }"
-          :ref="el => textareas[file.id] = el"
-          @focus="currentFocusedId = file.id"
-          placeholder="Veuillez entrer la transcription ici..."
-        ></textarea>
-        <button @click="validate(file.id)" class="edit-btn">Valider</button>
+          <textarea
+            v-model="file.transcription"
+            :class="{ empty: file.transcription === '' }"
+            :ref="el => textareas[file.id] = el"
+            @focus="currentFocusedId = file.id"
+            placeholder="Veuillez entrer la transcription ici..."
+          ></textarea>
+          <button @click="validate(file.id)" class="edit-btn">Valider</button>
 
-        <details v-if="file.history && file.history.length > 1" class="history-log">
-          <summary class="history-title">🕒 Historique des modifications</summary>
-          <ul>
-            <li v-for="(entry, idx) in file.history.slice(0, -1).reverse()" :key="idx" class="history-entry">
-              <span class="timestamp">🗓️ {{ new Date(entry.timestamp).toLocaleString() }}</span><br />
-              <span class="content text-sm italic">{{ entry.transcription }}</span>
-            </li>
-          </ul>
-        </details>
+          <details v-if="file.history && file.history.length > 1" class="history-log">
+            <summary class="history-title">🕒 Historique des modifications</summary>
+            <ul>
+              <li
+                v-for="(entry, idx) in file.history.slice(0, -1).reverse()"
+                :key="idx"
+                class="history-entry"
+              >
+                <span class="timestamp">🗓️ {{ new Date(entry.timestamp).toLocaleString() }}</span><br />
+                <span class="content text-sm italic">{{ entry.transcription }}</span>
+              </li>
+            </ul>
+          </details>
+        </div>
       </div>
     </div>
   </div>
@@ -117,7 +132,8 @@ async function validate(id) {
   const file = visibleFiles.value.find(f => f.id === id)
   try {
     const res = await fetch('/api/save-transcription', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: file.name, transcription: file.transcription })
     })
     if (!res.ok) throw new Error('Erreur lors de la sauvegarde.')
@@ -132,15 +148,35 @@ async function validate(id) {
   }
 }
 
-async function onRatingSelected(file, rating) {
-  file.rating = rating
+async function onRatingSelected(file) {
   try {
     const res = await fetch(`/api/save-rating/${file.id}`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ rating })
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rating: file.rating })
     })
     if (!res.ok) throw new Error('Erreur enregistrement note')
-    successMessage.value = `⭐ Note de ${rating} enregistrée !`
+    successMessage.value = `⭐ Note de ${file.rating} enregistrée !`
+    setTimeout(() => (successMessage.value = ''), 2000)
+  } catch (err) {
+    console.error(err)
+    successMessage.value = `❌ ${err.message}`
+    setTimeout(() => (successMessage.value = ''), 3000)
+  }
+}
+
+async function onThumbSelected(file, isUp) {
+  file.thumbVote = isUp ? 'up' : 'down'
+  try {
+    const res = await fetch(`/api/save-thumb/${file.id}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ thumb: file.thumbVote })
+    })
+    if (!res.ok) throw new Error('Erreur enregistrement vote')
+    successMessage.value = isUp
+      ? `👍 Merci pour votre retour !`
+      : `👎 Merci pour votre retour !`
     setTimeout(() => (successMessage.value = ''), 2000)
   } catch (err) {
     console.error(err)
@@ -193,9 +229,11 @@ onBeforeUnmount(() => {
 .transcription-col textarea { width: 100%; min-height: 100px; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; }
 .edit-btn { align-self: start; background: var(--btn-bg-color); color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; }
 .history-log { margin-top: 0.5rem; }
-.star-rating { display: flex; align-items: center; margin-bottom: 0.5rem; }
-.star { font-size: 24px; cursor: pointer; color: #ccc; margin-right: 4px; }
-.star.filled { color: gold; }
+.star-rating { margin-bottom: 0.5rem; }
+.filename-row { display: flex; align-items: center; gap: 0.5rem; }
+.thumb-rating { display: flex; align-items: center; gap: 0.5rem; }
+.thumb { font-size: 24px; cursor: pointer; color: #ccc; }
+.thumb.selected { color: #007bff; }
 .toast { background: #4caf50; color: white; padding: 0.5rem 1rem; border-radius: 4px; animation: fade-in-out 2s ease-in-out; position: sticky; top: 4rem; }
 @keyframes fade-in-out { 0%,100% { opacity: 0; } 10%,90% { opacity: 1; } }
 </style>
