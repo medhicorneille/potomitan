@@ -982,5 +982,53 @@
     "transcription": " A we, mwen an pa ba moun pe ve, paske bon mwen son flik sempal, ma.",
     "author": "whisper-large-v3",
     "timestamp": "2025-05-20T22:07:56.151244"
+  },
+  {
+    "name": "a1272980_vocals.wav",
+    "transcription": " kon pe la pe, ou jika pou mweni ati la plas kon sa, i ka mweni kon pe, kon mweni kon pe kou chou, kon kon.",
+    "author": "whisper-large-v3",
+    "timestamp": "2025-05-20T22:08:24.439443"
+  },
+  {
+    "name": "a17d67c8_vocals.wav",
+    "transcription": " Oui, effectivement. Mais là, ou ka di gen gen kon ki ni an ki joun ke koupe sa la, chawje sa. Parce avantage a kan mèm, lò koupe a la machine, prè nan machine na ka koupe, i ka chawje, i ka wote yon chan la. Ou an kon nong la, lò koupe yon mette a te, si la pi a tombe, ou pri basse yon te la toujou. Et si li zi na pa mache tout a te la.",
+    "author": "whisper-large-v3",
+    "timestamp": "2025-05-20T22:09:17.520453"
+  },
+  {
+    "name": "a4fa23cb_vocals.wav",
+    "transcription": " Bidi bididi bididi, un kase ou",
+    "author": "whisper-large-v3",
+    "timestamp": "2025-05-20T22:09:35.336869"
+  },
+  {
+    "name": "a56b35c8_vocals.wav",
+    "transcription": " Chapat.",
+    "author": "whisper-large-v3",
+    "timestamp": "2025-05-20T22:09:49.702864"
+  },
+  {
+    "name": "a8e62b57_vocals.wav",
+    "transcription": " A la soirée du thé. Merci beaucoup, beaucoup. Quelle belle soirée tu nous as proposé, franchement. Elle a fait une belle édicace sur le rubidome. Ok, allez-y. Charles et Lisa. Merci. Tu vois, ces petits précieux moments-là. Merci pour ça, vraiment, Michel.",
+    "author": "whisper-large-v3",
+    "timestamp": "2025-05-20T22:10:28.124126"
+  },
+  {
+    "name": "a9159d28_vocals.wav",
+    "transcription": " Y ni debite, mwen met sa la, paske bon. Fok mwen fè sa y ni a fè, donk mwen mète sa la.",
+    "author": "whisper-large-v3",
+    "timestamp": "2025-05-20T22:10:59.023362"
+  },
+  {
+    "name": "a9920e4a_vocals.wav",
+    "transcription": " A, biye baye de.",
+    "author": "whisper-large-v3",
+    "timestamp": "2025-05-20T22:11:13.801549"
+  },
+  {
+    "name": "a99258d3_vocals.wav",
+    "transcription": " videye",
+    "author": "whisper-large-v3",
+    "timestamp": "2025-05-20T22:11:31.532580"
   }
 ]
