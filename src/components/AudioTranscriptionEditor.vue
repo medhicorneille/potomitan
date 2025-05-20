@@ -17,12 +17,19 @@
     <div class="audio-transcription-list">
       <div v-for="(file, index) in visibleFiles" :key="file.id" class="audio-item">
         <audio :src="file.url" controls @ended="onAudioEnded(index)" />
-        <!-- Système de notation par étoiles -->
-        <star-ratings
-          v-model="file.rating"
-          :star-size="24"
-          @update:modelValue="() => onRatingSelected(file)"
-        />
+
+        <!-- Système de notation par étoiles personnalisé -->
+        <div class="star-rating">
+          <span
+            v-for="n in 5"
+            :key="n"
+            class="star"
+            @click="selectStar(file, n)"
+          >
+            {{ n <= file.rating ? '★' : '☆' }}
+          </span>
+        </div>
+
         <textarea
           v-model="file.transcription"
           class="transcription-box"
@@ -35,13 +42,9 @@
 
 <script>
 import axios from 'axios';
-import vue3starRatings from 'vue3-star-ratings';
 
 export default {
   name: 'AudioTranscriptionEditor',
-  components: {
-    StarRatings: vue3starRatings,
-  },
   data() {
     return {
       audioFiles: [],
@@ -68,7 +71,6 @@ export default {
   methods: {
     fetchAudioFiles() {
       axios.get('/api/audio-files').then(response => {
-        // Ajouter la propriété transcription et rating à chaque fichier
         this.audioFiles = response.data.map(file => ({
           ...file,
           transcription: file.transcription || '',
@@ -82,8 +84,11 @@ export default {
     goToNext() {
       if (this.hasNext) this.currentIndex++;
     },
+    selectStar(file, rating) {
+      file.rating = rating;
+      this.onRatingSelected(file);
+    },
     onRatingSelected(file) {
-      // Envoie la note au serveur dès la sélection
       axios.post(`/api/save-rating/${file.id}`, { rating: file.rating });
     },
     onAudioEnded(index) {
@@ -162,5 +167,16 @@ export default {
 .nav-status {
   color: var(--text-color);
   font-weight: 500;
+}
+
+.star-rating {
+  margin: 0.5rem 0;
+}
+
+.star {
+  cursor: pointer;
+  font-size: 24px;
+  margin-right: 4px;
+  color: gold;
 }
 </style>
