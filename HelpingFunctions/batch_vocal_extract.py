@@ -60,7 +60,7 @@ def extract_vocals(audio_path, output_dir):
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
 
-def process_directory(input_dir, output_dir, batch_size=10):
+def process_directory(input_dir, output_dir, batch_size=5):
     """
     Traite tous les fichiers MP3 dans un répertoire donné par lots.
 
