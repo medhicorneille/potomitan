@@ -18,11 +18,10 @@
       <div v-for="(file, index) in visibleFiles" :key="file.id" class="audio-item">
         <audio :src="file.url" controls @ended="onAudioEnded(index)" />
         <!-- Système de notation par étoiles -->
-        <star-rating
-          :star-size="24"
+        <star-ratings
           v-model="file.rating"
-          :show-rating="false"
-          @rating-selected="onRatingSelected(file)"
+          :star-size="24"
+          @update:modelValue="() => onRatingSelected(file)"
         />
         <textarea
           v-model="file.transcription"
@@ -36,12 +35,12 @@
 
 <script>
 import axios from 'axios';
-import StarRating from 'vue-star-rating';
+import vue3starRatings from 'vue3-star-ratings';
 
 export default {
   name: 'AudioTranscriptionEditor',
   components: {
-    StarRating,
+    StarRatings: vue3starRatings,
   },
   data() {
     return {
@@ -78,20 +77,14 @@ export default {
       });
     },
     goToPrevious() {
-      if (this.hasPrevious) {
-        this.currentIndex--;
-      }
+      if (this.hasPrevious) this.currentIndex--;
     },
     goToNext() {
-      if (this.hasNext) {
-        this.currentIndex++;
-      }
+      if (this.hasNext) this.currentIndex++;
     },
     onRatingSelected(file) {
       // Envoie la note au serveur dès la sélection
-      axios.post(`/api/save-rating/${file.id}`, {
-        rating: file.rating
-      });
+      axios.post(`/api/save-rating/${file.id}`, { rating: file.rating });
     },
     onAudioEnded(index) {
       const globalIndex = this.currentIndex * this.pageSize + index;
@@ -101,7 +94,7 @@ export default {
         rating: file.rating,
       }).then(() => {
         this.successMessage = 'Transcription et note enregistrées avec succès!';
-        setTimeout(() => this.successMessage = '', 3000);
+        setTimeout(() => (this.successMessage = ''), 3000);
       });
     }
   },

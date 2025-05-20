@@ -17,7 +17,8 @@
     "express": "^5.1.0",
     "pg": "^8.16.0",
     "vue": "^3.5.13",
-    "vue-star-rating": "^1.7.0"
+    "vue-star-rating": "^1.7.0",
+    "vue3-star-ratings": "^3.0.5"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.3",
