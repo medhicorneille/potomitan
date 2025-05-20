@@ -16,7 +16,8 @@
 
     <div class="audio-transcription-list">
       <div v-for="(file, index) in visibleFiles" :key="file.id" class="audio-item">
-        <audio :src="file.url" controls @ended="onAudioEnded(index)" />
+        <!-- Écoute audio simple, sans sauvegarde automatique à la fin -->
+        <audio :src="file.url" controls />
 
         <!-- Système de notation par étoiles personnalisé -->
         <div class="star-rating">
@@ -30,11 +31,13 @@
           </span>
         </div>
 
+        <!-- Zone de transcription avec bouton de sauvegarde manuelle -->
         <textarea
           v-model="file.transcription"
           class="transcription-box"
           placeholder="Entrez la transcription ici..."
         ></textarea>
+        <button @click="saveFeedback(file)" class="save-btn">Enregistrer</button>
       </div>
     </div>
   </div>
@@ -86,20 +89,17 @@ export default {
     },
     selectStar(file, rating) {
       file.rating = rating;
-      this.onRatingSelected(file);
+      this.saveFeedback(file);
     },
-    onRatingSelected(file) {
-      axios.post(`/api/save-rating/${file.id}`, { rating: file.rating });
-    },
-    onAudioEnded(index) {
-      const globalIndex = this.currentIndex * this.pageSize + index;
-      const file = this.audioFiles[globalIndex];
+    saveFeedback(file) {
       axios.post(`/api/save-transcription/${file.id}`, {
         transcription: file.transcription,
         rating: file.rating,
       }).then(() => {
         this.successMessage = 'Transcription et note enregistrées avec succès!';
         setTimeout(() => (this.successMessage = ''), 3000);
+      }).catch(err => {
+        console.error('Erreur sauvegarde feedback:', err);
       });
     }
   },
@@ -178,5 +178,21 @@ export default {
   font-size: 24px;
   margin-right: 4px;
   color: gold;
+}
+
+.transcription-box {
+  width: 100%;
+  min-height: 100px;
+  margin-top: 0.5rem;
+}
+
+.save-btn {
+  margin-top: 0.5rem;
+  background: var(--btn-bg-color);
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
 }
 </style>
