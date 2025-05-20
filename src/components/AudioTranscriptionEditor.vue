@@ -18,7 +18,7 @@
         <p class="filename">{{ file.name }}</p>
         <audio
           :ref="el => audioRefs[file.id] = el"
-          :src="file.src"
+          :src="file.url"
           controls
           class="audio-player"
           @play="currentFocusedId = file.id"
