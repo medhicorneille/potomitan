@@ -778,5 +778,65 @@
     "transcription": " Tout les légumes, toutes les viandes, c'est du local.",
     "author": "whisper-large-v3",
     "timestamp": "2025-05-20T21:48:31.303673"
+  },
+  {
+    "name": "802801af_vocals.wav",
+    "transcription": " Aoutizan mwen te yon mwenen.",
+    "author": "whisper-large-v3",
+    "timestamp": "2025-05-20T21:48:48.016412"
+  },
+  {
+    "name": "806c702d_vocals.wav",
+    "transcription": " Ye, Missy Creek!",
+    "author": "whisper-large-v3",
+    "timestamp": "2025-05-20T21:49:06.742702"
+  },
+  {
+    "name": "81b7a42a_vocals.wav",
+    "transcription": " Nou kwa gade apre nan sa krapase en Europe, e lor voyou asasine Saddam Hussein.",
+    "author": "whisper-large-v3",
+    "timestamp": "2025-05-20T21:49:37.099349"
+  },
+  {
+    "name": "82edde07_vocals.wav",
+    "transcription": " Mwen ton mwen mwen mwen siya.",
+    "author": "whisper-large-v3",
+    "timestamp": "2025-05-20T21:50:02.958151"
+  },
+  {
+    "name": "84611141_vocals.wav",
+    "transcription": " alo se gadi fè a chèche dlo an fote nna. Alo se kuzinye da gadi, e, servite la, e, a chèche dlo an fote nna.",
+    "author": "whisper-large-v3",
+    "timestamp": "2025-05-20T21:50:41.280181"
+  },
+  {
+    "name": "8566db27_vocals.wav",
+    "transcription": " Disreyi mayimet la",
+    "author": "whisper-large-v3",
+    "timestamp": "2025-05-20T21:51:03.481407"
+  },
+  {
+    "name": "85ab8ade_vocals.wav",
+    "transcription": " Supwiz!",
+    "author": "whisper-large-v3",
+    "timestamp": "2025-05-20T21:51:24.130352"
+  },
+  {
+    "name": "899f4fdc_vocals.wav",
+    "transcription": " SORE VILA!",
+    "author": "whisper-large-v3",
+    "timestamp": "2025-05-20T21:51:43.310117"
+  },
+  {
+    "name": "89a90bc1_vocals.wav",
+    "transcription": " Anse atè mouman.",
+    "author": "whisper-large-v3",
+    "timestamp": "2025-05-20T21:51:59.872228"
+  },
+  {
+    "name": "8a4cd2d7_vocals.wav",
+    "transcription": " Veji diyo wwa, i pa diyo wwa.",
+    "author": "whisper-large-v3",
+    "timestamp": "2025-05-20T21:52:20.623673"
   }
 ]
