@@ -1,3 +1,3 @@
-public/audio/*.mp3 filter=lfs diff=lfs merge=lfs -text
-public/audio/*.wav filter=lfs diff=lfs merge=lfs -text
-public/audio/*.ogg filter=lfs diff=lfs merge=lfs -text
+git lfs untrack "*.wav"
+git add .gitattributes
+git commit -m "Désactivation du suivi LFS global des .wav"
